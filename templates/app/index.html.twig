@@ -9,7 +9,10 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {% set url = page is defined and page ? api_url ~ "/articles/" ~ page : api_url ~ "/articles"  %}
+    {% set title = page is defined and page ? "Page" ~ page  : "Les derniers commentaires"  %}
+
+    <h1>{{ title }}</h1>
 
     <div id="articles">
 
@@ -24,9 +27,11 @@
             headers: {'Content-Type': 'application/json'}
         };
         var load = function (){
-            axios.get('http://127.0.0.1:8000/api/articles', options)
+            axios.get('{{ url }}', options)
                 .then((response) => {
                     let articles = response.data['hydra:member'];
+                    articles = typeof articles == 'undefined'? [response.data] : articles;
+                    console.log(articles);
 					$('#articles').empty();
                     articles.map((article) => {
                         
@@ -57,7 +62,7 @@
             let content = $('#commentOnArticle_'+article_id).val();
             axios({
                 method: 'post',
-                url: 'http://127.0.0.1:8000/api/comments',
+                url: '{{ api_url }}/comments',
                 data: {
                     "content": content,
                     "article": "api/articles/"+article_id
@@ -71,7 +76,7 @@
             let comment_id = $(this).attr('id').substring(5);
             axios({
                 method: 'post',
-                url: 'http://127.0.0.1:8000/api/reactions',
+                url: '{{ api_url }}/reactions',
                 data: {
                     "type": "like",
                     "comment": "api/comments/"+comment_id
@@ -85,7 +90,7 @@
             let comment_id = $(this).attr('id').substring(8);
             axios({
                 method: 'post',
-                url: 'http://127.0.0.1:8000/api/reactions',
+                url: '{{ api_url }}/reactions',
                 data: {
                     "type": "dislike",
                     "comment": "api/comments/"+comment_id
@@ -106,7 +111,7 @@
 			let content = $('#responseOnComment_'+comment_id).val();
             axios({
                 method: 'post',
-                url: 'http://127.0.0.1:8000/api/comments',
+                url: '{{ api_url }}/comments',
                 data: {
                    
                     "parent": "api/comments/"+comment_id,

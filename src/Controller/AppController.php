@@ -17,4 +17,14 @@ class AppController extends AbstractController
             'controller_name' => 'AppController',
         ]);
     }
+
+    /**
+     * @Route("/app/{page}", name="article")
+     */
+    public function article($page): Response
+    {
+        return $this->render('app/index.html.twig', [
+            'page' => $page,
+        ]);
+    }
 }
