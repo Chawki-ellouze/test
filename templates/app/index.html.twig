@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello AppController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    <h1>Hello {{ controller_name }}! ✅</h1>
+
+    <div id="articles">
+
+    </div>
+</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+    $(document).ready(function() {
+        const options = {
+            headers: {'Content-Type': 'application/json'}
+        };
+        var load = function (){
+            axios.get('http://127.0.0.1:8000/api/articles', options)
+                .then((response) => {
+                    let articles = response.data['hydra:member'];
+					$('#articles').empty();
+                    articles.map((article) => {
+                        
+                        $('#articles').append('<div class="article" id="article_'+article.id+'"><div style="background:grey;">'+article.content+'</div> <ul id="comments_'+article.id+'"></ul></div>');
+                        article.comments.map((comment) => {
+                            $('#comments_'+article.id).append('<li >'+comment.content+'</li>' +
+                                '<a class="like" id="like_'+comment.id+'" href="javascript:void(0)">Like ('+comment.likesNumber+') </a>  ' +
+                                '<a class="dislike" id="dislike_'+comment.id+'" href="javascript:void(0)">Dislike ('+comment.dislikesNumber+') </a>  ' +
+                                '<a class="answer" id="answer_'+comment.id+'" href="javascript:void(0)">Répondre ('+comment.responsesNumber+')</a>' +
+								'<div id="answer_div_'+comment.id+'"></div>'+
+								'<ul class="responses" id="responses_'+comment.id+'"></ul>'+
+                                '');
+								
+							comment.responses.map((response) => {
+								$('#responses_'+comment.id).append('<li>'+response.content+'</li>')
+							})	
+                        })
+                        $('#article_'+article.id).append('<div><textarea id="commentOnArticle_'+article.id+'"></textarea></div><button class="addComment">Commenter</button>');
+                    })
+                    ;
+                });
+        }
+        load();
+
+
+        $(document).on('click','.addComment',function (){
+            let article_id = $(this).parent().attr('id').substring(8);
+            let content = $('#commentOnArticle_'+article_id).val();
+            axios({
+                method: 'post',
+                url: 'http://127.0.0.1:8000/api/comments',
+                data: {
+                    "content": content,
+                    "article": "api/articles/"+article_id
+                }
+            }).then(()=>{
+                load();
+            });
+        });
+
+        $(document).on('click','.like',function (){
+            let comment_id = $(this).attr('id').substring(5);
+            axios({
+                method: 'post',
+                url: 'http://127.0.0.1:8000/api/reactions',
+                data: {
+                    "type": "like",
+                    "comment": "api/comments/"+comment_id
+                }
+            }).then(()=> {
+				load();
+			});;
+        });
+
+        $(document).on('click','.dislike',function (){
+            let comment_id = $(this).attr('id').substring(8);
+            axios({
+                method: 'post',
+                url: 'http://127.0.0.1:8000/api/reactions',
+                data: {
+                    "type": "dislike",
+                    "comment": "api/comments/"+comment_id
+                }
+            }).then(()=> {
+				load();
+			});;
+        });
+		
+		$(document).on('click','.answer',function (){
+			let comment_id = $(this).attr('id').substring(7);
+            $('#answer_div_'+comment_id).append('<textarea id="responseOnComment_'+comment_id+'"></textarea> <button class="addResponse">Répondre</button>');
+			
+        });
+		
+		$(document).on('click','.addResponse',function (){
+            let comment_id = $(this).parent().attr('id').substring(11);
+			let content = $('#responseOnComment_'+comment_id).val();
+            axios({
+                method: 'post',
+                url: 'http://127.0.0.1:8000/api/comments',
+                data: {
+                   
+                    "parent": "api/comments/"+comment_id,
+					"content": content
+                }
+            }).then(()=> {
+				load();
+			});
+        });
+    })
+
+
+    </script>
+{% endblock %}
