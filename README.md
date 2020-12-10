@@ -7,3 +7,5 @@ http://127.0.0.1:8000/app/1 pour le 1 er article
 http://127.0.0.1:8000/app/2 pour le 2 eme article
 
 L'authentification se fera avec votre compte google
+
+Pour le front, l'url de l'api est configuré dans le fichier twig.yaml sous la variable api_url: "http://127.0.0.1:8000/api"
