@@ -30,7 +30,6 @@ class GoogleAuthenticator extends SocialAuthenticator
 
     public function supports(Request $request)
     {
-        // continue ONLY if the current ROUTE matches the check ROUTE
         return $request->attributes->get('_route') === 'connect_google_check';
     }
 
@@ -42,7 +41,6 @@ class GoogleAuthenticator extends SocialAuthenticator
         // if (!$this->supports($request)) {
         //     return null;
         // }
-
         return $this->fetchAccessToken($this->getGoogleClient());
     }
 
@@ -50,23 +48,20 @@ class GoogleAuthenticator extends SocialAuthenticator
     {
         $googleUser = $this->getGoogleClient()
             ->fetchUserFromToken($credentials);
-dump($googleUser);exit;
+
         $email = $googleUser->getEmail();
 
         $existingUser = $this->em->getRepository(User::class)
-            ->findOneBy(['sub' => $googleUser->getSub()]);
+            ->findOneBy(['sub' => $googleUser->getId()]);
         if ($existingUser) {
             return $existingUser;
         }
 
-        // 2) do we have a matching user by email?
-        $user = $this->em->getRepository(User::class)
-            ->findOneBy(['email' => $email]);
-
-        // 3) Maybe you just want to "register" them by creating
-        // a User object
-        $user->setSub($googleUser->getSub());
-		$user->setFirstName($googleUser->getGivenName());
+        $user = new User();
+        $user->setEmail($googleUser->getEmail());
+        $user->setSub($googleUser->getId());
+		$user->setFirstName($googleUser->getFirstName());
+		$user->setLastName($googleUser->getLastName());
         $this->em->persist($user);
         $this->em->flush();
 

@@ -6,11 +6,12 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
-class User
+class User implements UserInterface
 {
     /**
      * @ORM\Id
@@ -95,7 +96,7 @@ class User
         return $this->sub;
     }
 
-    public function setSub(string $password): self
+    public function setSub(string $sub): self
     {
         $this->sub = $sub;
 
@@ -131,4 +132,34 @@ class User
 
         return $this;
     }
+
+    public function eraseCredentials()
+    {
+        // TODO: Implement eraseCredentials() method.
+    }
+    public function getPassword()
+    {
+        // TODO: Implement getPassword() method.
+    }
+    public function getRoles()
+    {
+        return ['ROLE_ADMIN'];
+    }
+    public function getSalt()
+    {
+        // TODO: Implement getSalt() method.
+    }
+    public function getUsername()
+    {
+        // TODO: Implement getUsername() method.
+    }
+
+    /**
+     * @param ArrayCollection $comments
+     */
+    public function setComments(ArrayCollection $comments): void
+    {
+        $this->comments = $comments;
+    }
+
 }
